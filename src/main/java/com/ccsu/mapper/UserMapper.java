@@ -36,4 +36,10 @@ public interface UserMapper extends BaseMapper<User> {
     //查询用户
     @Select("select * from user where name = #{name}")
     User checkUser(String name);
+
+    @Select("select * from user where account=#{token}")
+    User getInfo(String token);
+
+    @Update("update user set password = #{newPassword} where id = #{id}")
+    Integer updatePassword(Object object);
 }

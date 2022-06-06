@@ -70,4 +70,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User checkUser(String name) {
         return userMapper.checkUser(name);
     }
+
+    @Override
+    public User getInfo(String token) {
+        return userMapper.getInfo(token);
+    }
+
+    @Override
+    public Integer updatePassword(Object object) {
+        return userMapper.updatePassword(object);
+    }
 }

@@ -1,16 +1,13 @@
 package com.ccsu.controller;
 
-import java.util.List;
-import java.util.Random;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ccsu.common.R;
 import com.ccsu.entity.User;
 import com.ccsu.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -87,7 +84,6 @@ public class UserController {
     @PostMapping("/addUser")
     public R<String> save(@RequestBody User user){
         log.info("新增用户，用户信息为：{}",user.toString());
-        user.setPassword("123456");
 //        userService.save(user);
 //        return R.success("新增用户成功！");
         Integer msg=userService.addUser(user);
@@ -137,5 +133,42 @@ public class UserController {
         User u = userService.checkUser(name);
         System.out.println(u);
         return R.success("用户查询成功");
+    }
+    @GetMapping("/info")
+    public R<User> getInfo(@RequestParam String token){
+        User user = userService.getInfo(token);
+        if(user == null){
+            return R.error("失败");
+        }
+        user.setToken(user.getAccount());
+        return R.success(user);
+    }
+
+    @PostMapping("/updatePassword")
+    public R<String> updatePassword(@RequestBody Object object){
+        System.out.println(object);
+        Integer user = userService.updatePassword(object);
+        if(user==null){
+            return  R.error("失败");
+        }
+        return R.success("user");
+    }
+
+    @GetMapping("/page")
+    public R<Page> page(int pages,int pageSizes,String name){
+        log.info("page = {},pageSize = {},name = {}",pages,pageSizes,name);
+
+        Page pageInfo = new Page(pages,pageSizes);
+
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper();
+
+        queryWrapper.like(StringUtils.isNotEmpty(name),User::getName,name);
+        queryWrapper.eq(User::getIsdelete,1);
+
+        queryWrapper.orderByDesc(User::getId);
+
+        userService.page(pageInfo,queryWrapper);
+
+        return R.success(pageInfo);
     }
 }

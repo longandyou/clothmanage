@@ -21,4 +21,8 @@ public interface UserService extends IService<User> {
 
     //根据姓名查询用户
     User checkUser(String name);
+
+    User getInfo(String token);
+
+    Integer updatePassword(Object object);
 }
