@@ -132,7 +132,6 @@ public class InBoundInfoController {
 
         queryWrapper.eq(InBoundInfo::getIsdelete,1);
         queryWrapper.eq(InBoundInfo::getInboundid,inboundid);
-//        queryWrapper.eq(InBoundInfo::getInboundid,inboundid);
 
         queryWrapper.orderByDesc(InBoundInfo::getId);
 

@@ -125,8 +125,8 @@ public class OutBoundInfoController {
 //        queryWrapper.like(StringUtils.isNotEmpty(outboundid),OutBoundInfo::getProductid,outboundid);
 
         queryWrapper.eq(OutBoundInfo::getIsdelete,1);
+//        queryWrapper.eq(OutBoundInfo::getOutboundid,outboundid);
         queryWrapper.eq(OutBoundInfo::getOutboundid,outboundid);
-
         queryWrapper.orderByDesc(OutBoundInfo::getId);
 
         outBoundInfoService.page(pageInfo,queryWrapper);
