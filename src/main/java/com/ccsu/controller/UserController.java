@@ -127,6 +127,11 @@ public class UserController {
         return R.success("用户信息修改成功");
     }
 
+    /**
+     * 查询用户信息
+     * @param name
+     * @return
+     */
     @GetMapping("/check")
     public R<String> check(@RequestParam String name){
         log.info("查询用户信息");
@@ -134,6 +139,12 @@ public class UserController {
         System.out.println(u);
         return R.success("用户查询成功");
     }
+
+    /**
+     * 获取当前登录用户信息
+     * @param token
+     * @return
+     */
     @GetMapping("/info")
     public R<User> getInfo(@RequestParam String token){
         User user = userService.getInfo(token);
@@ -144,6 +155,11 @@ public class UserController {
         return R.success(user);
     }
 
+    /**
+     * 修改用户密码
+     * @param object
+     * @return
+     */
     @PostMapping("/updatePassword")
     public R<String> updatePassword(@RequestBody Object object){
         System.out.println(object);
@@ -154,17 +170,24 @@ public class UserController {
         return R.success("user");
     }
 
+    /**
+     * 分页查询用户信息
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
     @GetMapping("/page")
-    public R<Page> page(int pages,int pageSizes,String name){
-        log.info("page = {},pageSize = {},name = {}",pages,pageSizes,name);
-
-        Page pageInfo = new Page(pages,pageSizes);
-
+    public R<Page> page(int page,int pageSize,String name){
+        log.info("page = {},pageSize = {},name = {}",page,pageSize,name);
+        //分页构造器
+        Page pageInfo = new Page(page,pageSize);
+        //条件构造器
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper();
-
+        //模糊查询
         queryWrapper.like(StringUtils.isNotEmpty(name),User::getName,name);
         queryWrapper.eq(User::getIsdelete,1);
-
+        //按照ID排序
         queryWrapper.orderByDesc(User::getId);
 
         userService.page(pageInfo,queryWrapper);
