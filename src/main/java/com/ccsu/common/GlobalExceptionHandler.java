@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.SQLSyntaxErrorException;
 
 @ControllerAdvice(annotations = {RestController.class, Controller.class})
 @ResponseBody
 @Slf4j
 public class GlobalExceptionHandler {
+    //表中已存在数据的错误
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public R<String> exceptionHandler(SQLIntegrityConstraintViolationException ex){
         log.error(ex.getMessage());
@@ -26,10 +28,25 @@ public class GlobalExceptionHandler {
         return R.error("未知错误");
     }
 
+    //自定义错误
     @ExceptionHandler(CustomException.class)
     public R<String> exceptionHandler(CustomException cx){
         log.error(cx.getMessage());
 
         return R.error(cx.getMessage());
+    }
+
+    //表不存在错误
+    @ExceptionHandler(SQLSyntaxErrorException.class)
+    public R<String> exceptionHandler(SQLSyntaxErrorException ex){
+        log.error(ex.getMessage());
+
+        if(ex.getMessage().contains("doesn't exist")){
+            String[] split = ex.getMessage().split(" ");
+            String msg = split[1] + "表不存在";
+            return R.error(msg);
+        }
+
+        return R.error("未知错误");
     }
 }
