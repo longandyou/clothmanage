@@ -4,16 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ccsu.common.R;
-import com.ccsu.entity.InBound;
-import com.ccsu.entity.InBoundInfo;
-import com.ccsu.entity.Inventory;
-import com.ccsu.entity.User;
+import com.ccsu.entity.*;
 import com.ccsu.service.InBoundInfoService;
 import com.ccsu.service.InventoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -35,13 +34,12 @@ public class InBoundInfoController {
         //定义一个标记位，判断是否对库存进行新增操作，还是对已有的库存进行增加
         int flag = 1;
         log.info("新增入库明细，入库明细信息为：{}",inBoundInfo.toString());
-//        inBoundInfoService.save(inBoundInfo);
+//        LambdaQueryWrapper<Inventory> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(Inventory::getProductid,inBoundInfo.getProductid());
+//        Inventory inventory = inventoryService.getOne(queryWrapper);
         //新增入库明细时，判断货号是否已存在于库存中，如果存在就增加相应的库存
-        LambdaQueryWrapper<Inventory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Inventory::getProductid,inBoundInfo.getProductid());
-        Inventory inventory = inventoryService.getOne(queryWrapper);
-        if (inventory != null)
-        {
+        Inventory inventory = inventoryService.getInventory(inBoundInfo.getProductid());
+        if (inventory != null) {
             flag = 0;
             inventoryService.addInventory(inventory.getProductid(),inBoundInfo.getNumber());
         }
@@ -63,8 +61,10 @@ public class InBoundInfoController {
         log.info("删除入库明细信息,id为：{}",id);
         UpdateWrapper<InBoundInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("isdelete",0).eq("id",id);
-        inBoundInfoService.update(null,updateWrapper);
-
+        boolean msg = inBoundInfoService.update(null,updateWrapper);
+        if (!msg){
+            return R.error("入库明细删除失败");
+        }
         return R.success("入库明细删除成功");
     }
 
@@ -96,7 +96,10 @@ public class InBoundInfoController {
             return R.error("修改失败，库存量不足！");
         }
         //修改入库明细的时候同时修改库存量
-        inBoundInfoService.updateAndInventory(inBoundInfo,sum);
+        int msg = inBoundInfoService.updateAndInventory(inBoundInfo,sum);
+        if (msg == 0){
+            return R.error("入库明细修改失败");
+        }
         return R.success("入库明细修改成功");
     }
 
@@ -110,7 +113,27 @@ public class InBoundInfoController {
         log.info("查询入库明细,入库明细ID为：{}",id);
         InBoundInfo inBoundInfo = inBoundInfoService.checkInBoundInfo(id);
         System.out.println(inBoundInfo);
+        if (inBoundInfo == null){
+            return R.success("入库明细查询失败");
+        }
         return R.success("入库明细查询成功");
+    }
+
+    /**
+     * 模糊查询入库明细
+     * @param productname
+     * @param productid
+     * @return
+     */
+    @GetMapping("/checkinBoundInfo")
+    public R<List<InBoundInfo>> checkinBoundInfo(@RequestParam String productname, @RequestParam String productid){
+        log.info("模糊查询");
+        List<InBoundInfo> list = inBoundInfoService.inBoundInfoList(productname,productid);
+        if (list.size() == 0){
+            return R.error("无相关信息");
+        }
+        log.info(String.valueOf(list));
+        return R.success(list);
     }
 
     /**
@@ -121,14 +144,17 @@ public class InBoundInfoController {
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page, int pageSize, String inboundid){
-        log.info("page = {},pageSize = {},inboundid = {}",page,pageSize,inboundid);
+    public R<Page> page(int page, int pageSize,String productname,String productid, String inboundid){
+        log.info("page = {},pageSize = {},inboundid = {},productname = {},productid = {}"
+                ,page,pageSize,inboundid,productname,productid);
 
         Page pageInfo = new Page(page,pageSize);
 
         LambdaQueryWrapper<InBoundInfo> queryWrapper = new LambdaQueryWrapper();
 
-//        queryWrapper.like(StringUtils.isNotEmpty(inboundid),InBoundInfo::getProductid,inboundid);
+        //模糊查询
+        queryWrapper.like(StringUtils.isNotEmpty(productname),InBoundInfo::getProductname,productname);
+        queryWrapper.like(StringUtils.isNotEmpty(productid),InBoundInfo::getProductid,productid);
 
         queryWrapper.eq(InBoundInfo::getIsdelete,1);
         queryWrapper.eq(InBoundInfo::getInboundid,inboundid);

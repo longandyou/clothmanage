@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -68,13 +69,16 @@ public class UserController {
     @PutMapping("/topower")
     public R<String> topower(@RequestParam int id,@RequestParam int ispower){
         log.info("给用户授权");
+        String message1 = "授权成功!";
+        String message2 = "已收回权限!";
+        String message = ispower == 0 ? message1 : message2;
         int flag = ispower == 0 ? 1 : 0;
 //        userService.updateById(user);
         int msg = userService.topower(id,flag);
         if(msg != 1){
             return R.error("授权失败");
         }
-        return R.success("授权成功");
+        return R.success(message);
     }
     /**
      * 用户新增操作
@@ -128,7 +132,7 @@ public class UserController {
     }
 
     /**
-     * 查询用户信息
+     * 根据查询用户信息
      * @param name
      * @return
      */
@@ -138,6 +142,23 @@ public class UserController {
         User u = userService.checkUser(name);
         System.out.println(u);
         return R.success("用户查询成功");
+    }
+
+    /**
+     * 模糊查询用户
+     * @param name
+     * @param account
+     * @return
+     */
+    @GetMapping("/checkUser")
+    public R<List<User>> checkUser(@RequestParam String name,@RequestParam String account){
+        log.info("根据姓名和账号模糊查询用户信息");
+        List<User> list = userService.userList(name,account);
+        if (list.size() == 0){
+            return R.error("无相关信息");
+        }
+        log.info(String.valueOf(list));
+        return R.success(list);
     }
 
     /**
@@ -178,14 +199,16 @@ public class UserController {
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page,int pageSize,String name){
-        log.info("page = {},pageSize = {},name = {}",page,pageSize,name);
+    public R<Page> page(int page,int pageSize,String name,String account){
+        log.info("page = {},pageSize = {},name = {},account = {}",page,pageSize,name,account);
         //分页构造器
         Page pageInfo = new Page(page,pageSize);
         //条件构造器
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper();
         //模糊查询
         queryWrapper.like(StringUtils.isNotEmpty(name),User::getName,name);
+        queryWrapper.like(StringUtils.isNotEmpty(account),User::getAccount,account);
+        //匹配没被删除的条件
         queryWrapper.eq(User::getIsdelete,1);
         //按照ID排序
         queryWrapper.orderByDesc(User::getId);

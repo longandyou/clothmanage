@@ -27,10 +27,21 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
      * 根据货号对相应的库存进行修改
      * @param productid
      * @param sum
+     * @return
      */
     @Override
-    public void updateInventory(String productid, int sum) {
-        inventoryMapper.updateInventory(productid,sum);
+    public int updateInventory(String productid, int sum) {
+        return inventoryMapper.updateInventory(productid,sum);
+    }
+
+    /**
+     * 根据productid获得相应库存
+     * @param productid
+     * @return
+     */
+    @Override
+    public Inventory getInventory(String productid) {
+        return inventoryMapper.getInventory(productid);
     }
 
 }

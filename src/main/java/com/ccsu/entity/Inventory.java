@@ -12,15 +12,6 @@ public class Inventory implements Serializable {
     //货号
     private String productid;
 
-    //品名
-    private String productname;
-
-    //色号
-    private String color;
-
-    //尺寸
-    private String size;
-
     //货号
     private Integer number;
 

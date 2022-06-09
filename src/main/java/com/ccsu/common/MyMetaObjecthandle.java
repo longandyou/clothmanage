@@ -20,7 +20,7 @@ public class MyMetaObjecthandle implements MetaObjectHandler {
         log.info(metaObject.toString());
 
 //        metaObject.setValue("inboundtime",LocalDateTime.now());
-        metaObject.setValue("outboundtime",LocalDateTime.now());
+//        metaObject.setValue("outboundtime",LocalDateTime.now());
     }
 
     @Override

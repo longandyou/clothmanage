@@ -2,6 +2,7 @@ package com.ccsu.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public class OutBound implements Serializable {
 
     //出库时间
 //    @TableField(fill = FieldFill.INSERT)
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime outboundtime;
 
     //经办人

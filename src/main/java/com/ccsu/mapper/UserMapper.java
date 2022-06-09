@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ccsu.entity.User;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
-    //根据账号和密码查找用户
+    //根据账号和密码查找用户(用户登录)
     @Select("select * from user where account=#{account} AND password=#{password} AND isdelete!='0'")
 //    @Results(id = "userMap",value = {
 //            @Result(id = true,column = "id",property = "id"),
@@ -37,9 +39,15 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select * from user where name = #{name}")
     User checkUser(String name);
 
+    //查询当前用户信息
     @Select("select * from user where account=#{token}")
     User getInfo(String token);
 
+    //修改密码
     @Update("update user set password = #{newPassword} where id = #{id}")
     Integer updatePassword(Object object);
+
+    //模糊查询用户
+    @Select("select * from user where name like concat('%', #{name}, '%') and account like concat('%', #{account}, '%')")
+    List<User> userList(String name, String account);
 }

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class OutBoundInfoServiceImpl extends ServiceImpl<OutBoundInfoMapper, OutBoundInfo> implements OutBoundInfoService {
 
@@ -53,5 +55,16 @@ public class OutBoundInfoServiceImpl extends ServiceImpl<OutBoundInfoMapper, Out
     public void updateAndInventory(OutBoundInfo outBoundInfo, int sum) {
         this.updateById(outBoundInfo);
         inventoryService.updateInventory(outBoundInfo.getProductid(),sum);
+    }
+
+    /**
+     * 模糊查询出库明细
+     * @param productname
+     * @param productid
+     * @return
+     */
+    @Override
+    public List<OutBoundInfo> outBoundInfoList(String productname, String productid) {
+        return outBoundInfoMapper.outBoundInfoList(productname,productid);
     }
 }

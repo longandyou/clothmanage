@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ccsu.entity.InBoundInfo;
 import com.ccsu.entity.Inventory;
 import com.ccsu.mapper.InBoundInfoMapper;
-import com.ccsu.mapper.InventoryMapper;
 import com.ccsu.service.InBoundInfoService;
 import com.ccsu.service.InventoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -34,9 +35,6 @@ public class InBoundInfoServiceImpl extends ServiceImpl<InBoundInfoMapper, InBou
         if (flag == 1){
             Inventory inventory = new Inventory();
             inventory.setProductid(inBoundInfo.getProductid());
-            inventory.setProductname(inBoundInfo.getProductname());
-            inventory.setColor(inBoundInfo.getColor());
-            inventory.setSize(inBoundInfo.getSize());
             inventory.setNumber(inBoundInfo.getNumber());
             log.info(String.valueOf(inventory));
             if (inventoryService.save(inventory)){
@@ -51,13 +49,25 @@ public class InBoundInfoServiceImpl extends ServiceImpl<InBoundInfoMapper, InBou
      * 修改入库明细的时候同时修改库存量
      * @param inBoundInfo
      * @param sum
+     * @return
      */
     @Override
     //添加事务管理，要么同时成功，要么同时失败，保证了事务的一致性
     @Transactional(rollbackFor=Exception.class)
-    public void updateAndInventory(InBoundInfo inBoundInfo, int sum) {
+    public int updateAndInventory(InBoundInfo inBoundInfo, int sum) {
         this.updateById(inBoundInfo);
-        inventoryService.updateInventory(inBoundInfo.getProductid(),sum);
+        return inventoryService.updateInventory(inBoundInfo.getProductid(),sum);
+    }
+
+    /**
+     * 模糊查询入库明细
+     * @param productname
+     * @param productid
+     * @return
+     */
+    @Override
+    public List<InBoundInfo> inBoundInfoList(String productname, String productid) {
+        return inBoundInfoMapper.inBoundInfoList(productname,productid);
     }
 
 

@@ -7,6 +7,8 @@ import com.ccsu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     //注入userMapper
@@ -71,13 +73,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userMapper.checkUser(name);
     }
 
+    /**
+     * 获取当前登录用户信息
+     * @param token
+     * @return
+     */
     @Override
     public User getInfo(String token) {
         return userMapper.getInfo(token);
     }
 
+    /**
+     * 修改密码
+     * @param object
+     * @return
+     */
     @Override
     public Integer updatePassword(Object object) {
         return userMapper.updatePassword(object);
+    }
+
+    /**
+     * 模糊查询用户信息
+     * @param name
+     * @param account
+     * @return
+     */
+    @Override
+    public List<User> userList(String name, String account) {
+        return userMapper.userList(name,account);
     }
 }

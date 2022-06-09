@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/outbound")
@@ -73,6 +75,26 @@ public class OutBoundController {
     }
 
     /**
+     * 模糊查询出库信息
+     * @param outboundid
+     * @param warehouse
+     * @param transactor
+     * @return
+     */
+    @GetMapping("/checkOutbound")
+    public R<List<OutBound>> checkInbound(@RequestParam String outboundid,
+                                         @RequestParam String warehouse,
+                                         @RequestParam String transactor){
+        log.info("模糊查询");
+        List<OutBound> list = outBoundService.outBoundList(outboundid,warehouse,transactor);
+        if (list.size() == 0){
+            return R.error("无相关信息");
+        }
+        log.info(String.valueOf(list));
+        return R.success(list);
+    }
+
+    /**
      * 分页查询出库基本信息
      * @param page
      * @param pageSize
@@ -80,14 +102,18 @@ public class OutBoundController {
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page, int pageSize, String outboundid){
-        log.info("page = {},pageSize = {},outboundid = {}",page,pageSize,outboundid);
+    public R<Page> page(int page, int pageSize, String outboundid,String warehouse,String transactor){
+        log.info("page = {},pageSize = {},outboundid = {},warehouse = {},transactor = {}"
+                ,page,pageSize,outboundid,warehouse,transactor);
 
         Page pageInfo = new Page(page,pageSize);
 
         LambdaQueryWrapper<OutBound> queryWrapper = new LambdaQueryWrapper();
-
+        //模糊查询
         queryWrapper.like(StringUtils.isNotEmpty(outboundid),OutBound::getOutboundid,outboundid);
+        queryWrapper.like(StringUtils.isNotEmpty(warehouse),OutBound::getWarehouse,warehouse);
+        queryWrapper.like(StringUtils.isNotEmpty(transactor),OutBound::getTransactor,transactor);
+
         queryWrapper.eq(OutBound::getIsdelete,1);
 
         queryWrapper.orderByDesc(OutBound::getOutboundtime);

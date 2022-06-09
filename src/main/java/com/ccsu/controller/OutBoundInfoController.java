@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ccsu.common.R;
+import com.ccsu.entity.InBoundInfo;
 import com.ccsu.entity.Inventory;
 import com.ccsu.entity.OutBoundInfo;
 import com.ccsu.service.InventoryService;
@@ -13,6 +14,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -108,6 +111,23 @@ public class OutBoundInfoController {
     }
 
     /**
+     * 模糊查询出库明细
+     * @param productname
+     * @param productid
+     * @return
+     */
+    @GetMapping("/checkoutBoundInfo")
+    public R<List<OutBoundInfo>> checkinBoundInfo(@RequestParam String productname, @RequestParam String productid){
+        log.info("模糊查询");
+        List<OutBoundInfo> list = outBoundInfoService.outBoundInfoList(productname,productid);
+        if (list.size() == 0){
+            return R.error("无相关信息");
+        }
+        log.info(String.valueOf(list));
+        return R.success(list);
+    }
+
+    /**
      * 分页查询出库明细
      * @param page
      * @param pageSize
@@ -115,17 +135,20 @@ public class OutBoundInfoController {
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page, int pageSize, String outboundid){
-        log.info("page = {},pageSize = {},productid = {}",page,pageSize,outboundid);
+    public R<Page> page(int page, int pageSize, String outboundid,String productname,String productid){
+        log.info("page = {},pageSize = {},outboundid = {},productname = {},productid = {}"
+                ,page,pageSize,outboundid,productname,productid);
 
         Page pageInfo = new Page(page,pageSize);
 
         LambdaQueryWrapper<OutBoundInfo> queryWrapper = new LambdaQueryWrapper();
 
-//        queryWrapper.like(StringUtils.isNotEmpty(outboundid),OutBoundInfo::getProductid,outboundid);
+        //模糊查询
+        queryWrapper.like(StringUtils.isNotEmpty(productid),OutBoundInfo::getProductid,productid);
+        queryWrapper.like(StringUtils.isNotEmpty(productname),OutBoundInfo::getProductname,productname);
 
         queryWrapper.eq(OutBoundInfo::getIsdelete,1);
-//        queryWrapper.eq(OutBoundInfo::getOutboundid,outboundid);
+
         queryWrapper.eq(OutBoundInfo::getOutboundid,outboundid);
         queryWrapper.orderByDesc(OutBoundInfo::getId);
 
